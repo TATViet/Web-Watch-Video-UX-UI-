@@ -91,23 +91,24 @@
   <div class="logo" onclick="location.href='/'" style="cursor:pointer;">
   🦉
 </div>
-  <h2>Đăng nhập</h2>
+  <h2>Login</h2>
 
   <% if (error === 'invalid_credentials') { %>
-    <p style="color: red;">Tài khoản hoặc mật khẩu không đúng!</p>
+    <p style="color: red;">Incorrect username or password!</p>
   <% } %>
 
   <form method="POST" action="/auth/login">
-    <input type="text" name="username" placeholder="Email hoặc Tên hiển thị" required>
-    <input type="password" name="password" placeholder="Mật khẩu" required>
-    <button>Đăng nhập</button>
+    <input type="text" name="username" placeholder="Email or Display Name" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <button>Login</button>
   </form>
 
   <div class="links">
-    Chưa có tài khoản?
-    <a href="/register">Đăng ký</a>
+    Don't have an account yet?
+    <a href="/register">Register</a>
   </div>
 </div>
 
 </body>
 </html>
+
