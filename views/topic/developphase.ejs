@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OwlLoop — 404</title>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <div class="logo" onclick="location.href='/'" style="cursor:pointer;">
+    🦉
+  </div>
+  <style>
+:root{
+  --mobile-w:420px;
+  --bg:#1f3326;
+  --card:#2a4031;
+  --muted:#b7c7bc;
+  --accent:#88c273;
+  --accent-2:#a6d39b;
+  --radius:14px;
+  font-family: Inter, system-ui, Arial;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#111;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+}
+
+.container{
+  width:100%;
+  max-width:var(--mobile-w);
+  min-height:100vh;
+  padding:14px;
+  background:var(--bg);
+}
+
+/* ===== ICON SYSTEM ===== */
+.icon{
+  width:20px;
+  height:20px;
+  stroke:#fff;
+  stroke-width:2;
+  fill:none;
+}
+
+.icon-btn{
+  height:36px;
+  padding:0 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.08);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+}
+
+/* ===== HEADER ===== */
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+}
+
+/* LOGO: full green */
+.logo{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+}
+
+/* ===== FEATURED ===== */
+.featured{
+  background:var(--card);
+  padding:14px;
+  border-radius:var(--radius);
+}
+
+.video-title{
+  font-weight:700;
+  font-size:15px;
+}
+
+.video-meta{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+.video-thumb{
+  margin-top:10px;
+  position:relative;
+  aspect-ratio:16/9;
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.video-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:.85;
+}
+
+.play-btn{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.play-btn div{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.play-btn svg{
+  width:26px;
+  height:26px;
+  fill:#fff;
+}
+
+.video-info{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title{
+  margin:16px 0 8px;
+  font-size:14px;
+  font-weight:700;
+}
+
+/* ===== USER TOPICS (NO SCROLL) ===== */
+.topics-static{
+  display:flex;
+  gap:10px;
+}
+
+.topic{
+  padding:8px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  font-size:13px;
+}
+
+.topic.more{
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* ===== CONTINUE ===== */
+.continue{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:14px;
+  margin-top:16px;
+}
+
+.continue-item{
+  display:flex;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.thumb{
+  width:96px;
+  height:54px;
+  background:#000;
+  border-radius:8px;
+}
+
+.continue-title{
+  font-size:14px;
+  font-weight:600;
+}
+
+.continue-meta{
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+}
+
+.modal-overlay.show{
+  display:flex;
+}
+
+.modal{
+  width:90%;
+  max-width:360px;
+  background:var(--card);
+  border-radius:16px;
+  padding:14px;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.close{
+  cursor:pointer;
+  opacity:.7;
+}
+
+.search{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:#1f3326;
+  color:#fff;
+  margin-bottom:10px;
+}
+
+.sort{
+  display:flex;
+  gap:8px;
+}
+
+.sort button{
+  flex:1;
+  padding:8px 0;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  font-size:13px;
+}
+
+.sort button.active{
+  background:var(--accent);
+  color:#123;
+  font-weight:600;
+}
+
+.tag-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding-top:6px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.tag{
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  font-size:13px;
+  cursor:pointer;
+}
+
+.sort-wrapper{
+  margin-bottom:12px;
+}
+
+.sort-label{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+</style>
+</header>
+
+<section
+  style="
+    min-height:70vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:12px;
+  "
+>
+
+  <div
+    style="
+      font-size:64px;
+      font-weight:800;
+      line-height:1;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    "
+  >
+    404
+  </div>
+
+  <div class="section-title">
+    Page Not Found
+  </div>
+
+  <p style="font-size:13px; color:var(--muted); max-width:260px;">
+    The topic or page you are looking for doesn’t exist yet,
+    or has been moved.
+  </p>
+
+  <div style="display:flex; gap:10px; margin-top:10px;">
+    <div
+      class="topic"
+      onclick="location.href='/'"
+      style="cursor:pointer;"
+    >
+      Back to Home
+    </div>
+
+    <div
+      class="topic"
+      onclick="history.back()"
+      style="cursor:pointer; opacity:.8;"
+    >
+      Go Back
+    </div>
+  </div>
+
+</section>
+
+</div>
+</body>
+</html>
