@@ -1,21 +1,15 @@
 const { Pool } = require("pg");
 
-// Pool dùng để tạo database (connect vào postgres)
+// Admin pool (kết nối đến DB "postgres" cho admin tasks)
 const adminPool = new Pool({
-  user: "postgres",
-  password: "vietk12+",
-  host: "localhost",
-  port: 5432,
-  database: "postgres"
+  connectionString: process.env.ADMIN_DB_URL || "postgres://postgres:vietk12+@localhost:5432/postgres",
+  ssl: process.env.ADMIN_DB_URL ? { rejectUnauthorized: false } : false,  // Bật SSL cho cloud/remote
 });
 
-// Pool dùng cho app chính
+// App pool (kết nối đến DB "owlloop")
 const appPool = new Pool({
-  user: "postgres",
-  password: "vietk12+",
-  host: "localhost",
-  port: 5432,
-  database: "owlloop"
+  connectionString: process.env.APP_DB_URL || "postgres://postgres:vietk12+@localhost:5432/owlloop",
+  ssl: process.env.APP_DB_URL ? { rejectUnauthorized: false } : false,
 });
 
 module.exports = { adminPool, appPool };
