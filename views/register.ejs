@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Register</title>
   <style>
     :root{
@@ -90,23 +91,23 @@
   <div class="logo" onclick="location.href='/'" style="cursor:pointer;">
   🦉
 </div>
-  <h2>Đăng ký</h2>
+  <h2>Register</h2>
 
   <% if (error === 'email_exists') { %>
   <p style="color: red;">Email đã tồn tại!</p>
   <% } %>
 
   <form method="POST" action="/auth/register">
-    <input type="text" name="display_name" placeholder="Tên hiển thị" required>
+    <input type="text" name="display_name" placeholder="Display name" required>
     <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Mật khẩu" required>
-    <input type="password" placeholder="Nhập lại mật khẩu">
-    <button>Tạo tài khoản</button>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="password" placeholder="Re-enter the password">
+    <button>Register</button>
   </form>
 
   <div class="links">
-    Đã có tài khoản?
-    <a href="/login">Đăng nhập</a>
+    Already have an account?
+    <a href="/login">Login</a>
   </div>
 </div>
 
