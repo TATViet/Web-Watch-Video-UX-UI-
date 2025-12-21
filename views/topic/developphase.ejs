@@ -327,49 +327,7 @@ header{
 <header>
   <div class="logo" onclick="location.href='/'">🦉</div>
 
-  <div style="display:flex; gap:8px;">
-    <% if (!user) { %>
-      <div class="icon-btn" onclick="location.href='/login'">
-        <svg class="icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
-        </svg>
-        Login
-      </div>
-    <% } else { %>
-      <div class="icon-btn" onclick="location.href='/account'">
-        <svg class="icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
-        </svg>
-        <%= user.name %>
-      </div>
-    <% } %>
-
-    <div class="icon-btn">
-      <svg class="icon" viewBox="0 0 24 24">
-        <path d="M4 4h16v16H4z"/>
-        <path d="M4 6l8 6 8-6"/>
-      </svg>
-    </div>
-
-    <div class="icon-btn">
-      <svg class="icon" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="7"/>
-        <line x1="21" y1="21" x2="16.5" y2="16.5"/>
-      </svg>
-    </div>
-  </div>
-</header>
-
-<div class="section-title">Topic: Knowledge</div>
-
-<section class="topics-static">
-  <div class="topic" onclick="location.href='/topic/knowledge'">Knowledge</div>
-  <div class="topic" onclick="location.href='/topic/podcast'">Podcast</div>
-  <div class="topic" onclick="location.href='/topic/asmr'">ASMR</div>
-</section>
-
+  
 <section class="continue">
   <% if (videos && videos.length > 0) { %>
     <% videos.forEach(video => { %>
@@ -410,3 +368,4 @@ header{
 </div>
 </body>
 </html>
+
