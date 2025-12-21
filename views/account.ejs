@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account</title>
+  <style>
+    :root{
+      --bg:#0f1712;
+      --card:#243528;
+      --accent:#88c273;
+      --muted:#b9c7b8;
+      --radius:14px;
+      font-family: Inter, system-ui, Arial;
+      font-size:16px; /* Base font size */
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:linear-gradient(180deg,#0f1712,#16231a);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#f7f5ef;
+    }
+
+    .auth-box{
+      width:100%;
+      max-width:360px;
+      background:var(--card);
+      padding:24px;
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .logo{
+      width:52px;height:52px;
+      border-radius:14px;
+      background:linear-gradient(135deg,#88c273,#a6d39b);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:26px;
+      margin:0 auto 14px;
+    }
+
+    h2{
+      text-align:center;
+      margin:0 0 20px;
+    }
+
+    .info {
+      font-size:15px; /* Larger font for info */
+      color:var(--muted);
+      margin-bottom:20px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .field {
+      display:flex;
+      align-items:center;
+      gap:6px;
+      text-align:left; /* Left align */
+    }
+
+    .field strong {
+      color:#fff;
+    }
+
+    .field span:not(.edit-btn) {
+      color:var(--muted);
+    }
+
+    .edit-btn {
+      color:var(--accent);
+      cursor:pointer;
+      font-size:15px;
+      margin-left:auto; /* Push to right */
+    }
+
+    input{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:none;
+      margin-bottom:12px;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:var(--accent);
+      color:#1b2b21;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    /* ===== MODAL ===== */
+    .modal {
+      display:none;
+      position:fixed;
+      z-index:100;
+      left:0;
+      top:0;
+      width:100%;
+      height:100%;
+      overflow:auto;
+      background-color:rgba(0,0,0,0.4);
+      justify-content:center;
+      align-items:center;
+    }
+
+    .modal-content {
+      background:var(--card);
+      margin:auto;
+      padding:20px;
+      border-radius:var(--radius);
+      width:80%;
+      max-width:300px;
+      text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .error {
+      color:#ff6b6b;
+      font-size:13px;
+    }
+
+    .close {
+      color:#aaa;
+      float:right;
+      font-size:28px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .close:hover {
+      color:#fff;
+    }
+  </style>
+</head>
+<body>
+<div class="auth-box">
+  <div class="logo" onclick="location.href='/'" style="cursor:pointer;">
+    🦉
+  </div>
+  <h2>Your Account</h2>
+  <div class="info">
+    <div class="field" id="name-field">
+      <strong>Display Name:</strong> <span id="name-value"><%= user.name %></span>
+      <span class="edit-btn" onclick="openModal('name')">Change</span>
+    </div>
+    <div class="field" id="email-field">
+      <strong>Email:</strong> <span id="email-value"><%= user.email %></span>
+      <span class="edit-btn" onclick="openModal('email')">Change</span>
+    </div>
+    <div class="field" id="password-field">
+      <strong>Password:</strong> <span>********</span>
+      <span class="edit-btn" onclick="openModal('password')">Change</span>
+    </div>
+  </div>
+  <!-- Logout -->
+  <form method="POST" action="/auth/logout">
+    <button type="submit">Logout</button>
+  </form>
+</div>
+
+<!-- Modal for Password Confirmation -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2>Confirm Password</h2>
+    <p id="error-msg" class="error" style="display:none;"></p>
+    <form id="confirmForm">
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="button" onclick="confirmPassword()">Confirm</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  let currentField = '';
+
+  function openModal(field) {
+    currentField = field;
+    document.getElementById('confirmModal').style.display = 'flex';
+    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('password').value = '';
+  }
+
+  function closeModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+  }
+
+  async function confirmPassword() {
+    const password = document.getElementById('password').value;
+    const response = await fetch('/account/confirm-edit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `password=${encodeURIComponent(password)}`
+    });
+    const data = await response.json();
+    if (data.success) {
+      closeModal();
+      enableEdit(currentField);
+    } else {
+      document.getElementById('error-msg').textContent = 'Invalid password!';
+      document.getElementById('error-msg').style.display = 'block';
+    }
+  }
+
+  function enableEdit(field) {
+    const fieldElement = document.getElementById(`${field}-field`);
+    const valueSpan = fieldElement.querySelector('span:not(.edit-btn)');
+    const editBtn = fieldElement.querySelector('.edit-btn');
+
+    let input = document.createElement('input');
+    input.type = field === 'password' ? 'password' : (field === 'email' ? 'email' : 'text');
+    input.value = field !== 'password' ? valueSpan.textContent : '';
+    input.placeholder = field === 'password' ? 'New Password' : '';
+    valueSpan.replaceWith(input);
+    editBtn.textContent = 'Save';
+    editBtn.onclick = () => saveChanges(field, input.value);
+  }
+
+  async function saveChanges(field, newValue) {
+    let body = '';
+    if (field === 'name') {
+      body = `display_name=${encodeURIComponent(newValue)}`;
+    } else if (field === 'email') {
+      body = `email=${encodeURIComponent(newValue)}`;
+    } else if (field === 'password') {
+      body = `new_password=${encodeURIComponent(newValue)}`;
+    }
+
+    const response = await fetch('/account/edit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body
+    });
+    const data = await response.json();
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Update failed!');
+    }
+  }
+</script>
+</body>
+</html>

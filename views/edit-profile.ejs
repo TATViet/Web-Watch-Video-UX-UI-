@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chỉnh sửa tài khoản</title>
+  <style>
+    :root{
+      --mobile-w:420px;
+      --bg:#1f3326;
+      --card:#2a4031;
+      --muted:#b7c7bc;
+      --accent:#88c273;
+      --accent-2:#a6d39b;
+      --radius:14px;
+      font-family: Inter, system-ui, Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:#111;
+      color:#fff;
+      display:flex;
+      justify-content:center;
+    }
+    .container{
+      width:100%;
+      max-width:var(--mobile-w);
+      min-height:100vh;
+      padding:14px;
+      background:var(--bg);
+    }
+    /* ===== ICON SYSTEM ===== */
+    .icon{
+      width:20px;
+      height:20px;
+      stroke:#fff;
+      stroke-width:2;
+      fill:none;
+    }
+    .icon-btn{
+      height:36px;
+      padding:0 10px;
+      border-radius:10px;
+      background:rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-size:13px;
+      cursor:pointer;
+    }
+    /* ===== HEADER ===== */
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:16px;
+    }
+    /* LOGO: full green */
+    .logo{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+    }
+    /* ===== AUTH SECTION ===== */
+    .auth-box {
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:14px;
+    }
+    .auth-box h2 {
+      margin:6px 0 4px;
+      font-size:16px;
+    }
+    .success {
+      color:#2ecc71;
+      font-size:13px;
+    }
+    /* ===== FORM ELEMENTS ===== */
+    form {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      height:36px;
+      padding:0 10px;
+      border-radius:10px;
+      background:rgba(255,255,255,.08);
+      border:none;
+      color:#fff;
+      font-size:13px;
+    }
+    input::placeholder {
+      color:var(--muted);
+    }
+    button {
+      height:36px;
+      padding:0 10px;
+      border-radius:10px;
+      background:var(--accent);
+      border:none;
+      color:#123;
+      font-size:13px;
+      cursor:pointer;
+    }
+    a {
+      color:var(--accent);
+      text-decoration:none;
+      font-size:13px;
+      margin-top:10px;
+      display:inline-block;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo" onclick="location.href='/'" style="cursor:pointer;">🦉</div>
+    <div style="display:flex; gap:8px;">
+      <div class="icon-btn" onclick="location.href='/account'">
+        <svg class="icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+        </svg>
+        <%= user.name %>
+      </div>
+    </div>
+  </header>
+  <section class="auth-box">
+    <h2>Chỉnh sửa thông tin</h2>
+    <% if (success) { %>
+      <p class="success">Cập nhật thành công!</p>
+    <% } %>
+    <form method="POST" action="/account/edit">
+      <input type="text" name="display_name" value="<%= user.name %>" required>
+      <input type="email" name="email" value="<%= user.email %>" required>
+      <input type="password" name="new_password" placeholder="Mật khẩu mới (nếu muốn thay đổi)">
+      <button>Cập nhật</button>
+    </form>
+    <a href="/account">Quay lại</a>
+  </section>
+</div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Logout</title>
+  <style>
+    :root{
+      --bg:#0f1712;
+      --card:#243528;
+      --accent:#88c273;
+      --danger:#d96b6b;
+      --radius:14px;
+      font-family: Inter, system-ui, Arial;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:linear-gradient(180deg,#0f1712,#16231a);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#f7f5ef;
+    }
+
+    .box{
+      width:100%;
+      max-width:340px;
+      background:var(--card);
+      padding:22px;
+      border-radius:var(--radius);
+      text-align:center;
+    }
+
+    h3{
+      margin-top:0;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    button{
+      flex:1;
+      padding:10px;
+      border:none;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .cancel{
+      background:rgba(255,255,255,0.15);
+      color:#fff;
+    }
+
+    .logout{
+      background:var(--danger);
+      color:#fff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h3>Đăng xuất?</h3>
+  <p>Bạn có chắc muốn đăng xuất khỏi OwlLoop không?</p>
+
+  <div class="actions">
+    <button class="cancel" onclick="location.href='/'">Hủy</button>
+
+    <form method="POST" action="/auth/logout">
+      <button class="logout">Đăng xuất</button>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

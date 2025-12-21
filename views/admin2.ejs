@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin2 - Manage Videos</title>
+  <style>
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    img { max-width: 100px; height: auto; } /* Giới hạn kích thước ảnh */
+  </style>
+</head>
+<body>
+  <h1>Admin Panel - Manage Videos</h1>
+  
+  <% if (success) { %>
+    <p style="color: green;">Action successful!</p>
+  <% } %>
+  
+  <% if (error) { %>
+    <p style="color: red;">Error occurred. Please try again.</p>
+  <% } %>
+  
+  <h2>List of Videos</h2>
+  <% if (videos && videos.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Pic</th>
+          <th>Title</th>
+          <th>URL</th>
+          <th>Channel</th>
+          <th>Topics</th>
+          <th>Duration</th> <!-- Bỏ (seconds), vì giờ là text -->
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% videos.forEach(video => { %>
+          <% 
+            // Extract VIDEO_ID từ URL
+            let videoId = '';
+            if (video.url.includes('youtube.com/watch?v=')) {
+              videoId = video.url.split('v=')[1].split('&')[0]; // Lấy ID từ full URL
+            } else if (video.url.includes('youtu.be/')) {
+              videoId = video.url.split('youtu.be/')[1].split('?')[0]; // Lấy ID từ short URL
+            }
+            const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : ''; // Nếu không có ID, để rỗng
+          %>
+          <tr>
+            <td><%= video.id %></td>
+            <td>
+              <% if (thumbnailUrl) { %>
+                <img src="<%= thumbnailUrl %>" alt="Thumbnail">
+              <% } else { %>
+                No thumbnail
+              <% } %>
+            </td>
+            <td><%= video.title %></td>
+            <td><a href="<%= video.url %>" target="_blank"><%= video.url %></a></td>
+            <td><%= video.channel %></td>
+            <td><%= video.topics ? video.topics.join(', ') : 'None' %></td>
+            <td><%= video.duration %></td> <!-- Hiển thị text trực tiếp -->
+            <td><%= video.created_at %></td>
+            <td>
+              <form action="/admin2/delete" method="POST" style="display: inline;">
+                <input type="hidden" name="id" value="<%= video.id %>">
+                <button type="submit" onclick="return confirm('Are you sure you want to delete this video?');">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p>No videos found.</p>
+  <% } %>
+  
+  <br>
+  <a href="/admin">Go to Add Video Page</a>
+</body>
+</html>
