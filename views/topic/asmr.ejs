@@ -1,9 +1,289 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OwlLoop — Topic: ASMR</title>
+
+<style>
+:root{
+  --mobile-w:420px;
+  --bg:#1f3326;
+  --card:#2a4031;
+  --muted:#b7c7bc;
+  --accent:#88c273;
+  --accent-2:#a6d39b;
+  --radius:14px;
+  font-family: Inter, system-ui, Arial;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#111;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+}
+.container{
+  width:100%;
+  max-width:var(--mobile-w);
+  min-height:100vh;
+  padding:14px;
+  background:var(--bg);
+}
+/* ===== ICON SYSTEM ===== */
+.icon{
+  width:20px;
+  height:20px;
+  stroke:#fff;
+  stroke-width:2;
+  fill:none;
+}
+.icon-btn{
+  height:36px;
+  padding:0 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.08);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+}
+/* ===== HEADER ===== */
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+}
+/* LOGO: full green */
+.logo{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+}
+/* ===== FEATURED ===== */
+.featured{
+  background:var(--card);
+  padding:14px;
+  border-radius:var(--radius);
+}
+.video-title{
+  font-weight:700;
+  font-size:15px;
+}
+.video-meta{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+.video-thumb{
+  margin-top:10px;
+  position:relative;
+  aspect-ratio:16/9;
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+}
+.video-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:.85;
+}
+.play-btn{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.play-btn div{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.play-btn svg{
+  width:26px;
+  height:26px;
+  fill:#fff;
+}
+.video-info{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--muted);
+}
+/* ===== SECTION TITLE ===== */
+.section-title{
+  margin:16px 0 8px;
+  font-size:14px;
+  font-weight:700;
+}
+/* ===== USER TOPICS (NO SCROLL) ===== */
+.topics-static{
+  display:flex;
+  gap:10px;
+}
+.topic{
+  padding:8px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  font-size:13px;
+}
+.topic.more{
+  font-weight:700;
+  cursor:pointer;
+}
+/* ===== CONTINUE ===== */
+.continue{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:14px;
+  margin-top:16px;
+}
+.continue-item{
+  display:flex;
+  gap:12px;
+  margin-bottom:12px;
+  cursor:pointer;
+  align-items: flex-start; /* Align top để text dài không ảnh hưởng thumbnail */
+}
+.thumb{
+  width:96px;
+  height:54px;
+  border-radius:8px;
+  overflow:hidden;
+  position:relative;
+  flex-shrink: 0; /* Ngăn thumbnail bị co lại */
+}
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.continue-info {
+  flex: 1; /* Chiếm hết không gian còn lại */
+  min-width: 0; /* Cho phép co lại nếu cần */
+}
+.continue-title{
+  font-size:14px;
+  font-weight:600;
+  overflow: hidden; /* Ẩn text tràn */
+  text-overflow: ellipsis; /* Thêm dấu ... nếu dài */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Giới hạn 2 dòng */
+  -webkit-box-orient: vertical;
+  line-height: 1.2; /* Điều chỉnh line height */
+}
+.continue-meta{
+  font-size:12px;
+  color:var(--muted);
+  white-space: nowrap; /* Không wrap meta */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* ===== MODAL ===== */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+}
+.modal-overlay.show{
+  display:flex;
+}
+.modal{
+  width:90%;
+  max-width:360px;
+  background:var(--card);
+  border-radius:16px;
+  padding:14px;
+}
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+.close{
+  cursor:pointer;
+  opacity:.7;
+}
+.search{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:#1f3326;
+  color:#fff;
+  margin-bottom:10px;
+}
+.sort{
+  display:flex;
+  gap:8px;
+}
+.sort button{
+  flex:1;
+  padding:8px 0;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  font-size:13px;
+}
+.sort button.active{
+  background:var(--accent);
+  color:#123;
+  font-weight:600;
+}
+.tag-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding-top:6px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.tag{
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  font-size:13px;
+  cursor:pointer;
+}
+.sort-wrapper{
+  margin-bottom:12px;
+}
+.sort-label{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+/* ===== PREMIUM ===== */
+.premium{
+  margin-top:14px;
+  border-top:1px solid rgba(255,255,255,.2);
+  padding-top:10px;
+  font-size:13px;
+}
+</style>
+</head>
+
 <body>
 <div class="container">
-
 <header>
   <div class="logo" onclick="location.href='/'">🦉</div>
-
   <div style="display:flex; gap:8px;">
     <% if (!user) { %>
       <div class="icon-btn" onclick="location.href='/login'">
@@ -22,14 +302,12 @@
         <%= user.name %>
       </div>
     <% } %>
-
     <div class="icon-btn">
       <svg class="icon" viewBox="0 0 24 24">
         <path d="M4 4h16v16H4z"/>
         <path d="M4 6l8 6 8-6"/>
       </svg>
     </div>
-
     <div class="icon-btn">
       <svg class="icon" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="7"/>
@@ -38,334 +316,16 @@
     </div>
   </div>
 </header>
-
-<style>
-:root{
-  --mobile-w:420px;
-  --bg:#1f3326;
-  --card:#2a4031;
-  --muted:#b7c7bc;
-  --accent:#88c273;
-  --accent-2:#a6d39b;
-  --radius:14px;
-  font-family: Inter, system-ui, Arial;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  background:#111;
-  color:#fff;
-  display:flex;
-  justify-content:center;
-}
-
-.container{
-  width:100%;
-  max-width:var(--mobile-w);
-  min-height:100vh;
-  padding:14px;
-  background:var(--bg);
-}
-
-/* ===== ICON SYSTEM ===== */
-.icon{
-  width:20px;
-  height:20px;
-  stroke:#fff;
-  stroke-width:2;
-  fill:none;
-}
-
-.icon-btn{
-  height:36px;
-  padding:0 10px;
-  border-radius:10px;
-  background:rgba(255,255,255,.08);
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:13px;
-}
-
-/* ===== HEADER ===== */
-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:16px;
-}
-
-/* LOGO: full green */
-.logo{
-  width:44px;
-  height:44px;
-  border-radius:14px;
-  background:linear-gradient(135deg,var(--accent),var(--accent-2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-}
-
-/* ===== FEATURED ===== */
-.featured{
-  background:var(--card);
-  padding:14px;
-  border-radius:var(--radius);
-}
-
-.video-title{
-  font-weight:700;
-  font-size:15px;
-}
-
-.video-meta{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:2px;
-}
-
-.video-thumb{
-  margin-top:10px;
-  position:relative;
-  aspect-ratio:16/9;
-  border-radius:12px;
-  overflow:hidden;
-  cursor:pointer;
-}
-
-.video-thumb img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  opacity:.85;
-}
-
-.play-btn{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.play-btn div{
-  width:54px;
-  height:54px;
-  border-radius:50%;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.play-btn svg{
-  width:26px;
-  height:26px;
-  fill:#fff;
-}
-
-.video-info{
-  margin-top:8px;
-  font-size:13px;
-  color:var(--muted);
-}
-
-/* ===== SECTION TITLE ===== */
-.section-title{
-  margin:16px 0 8px;
-  font-size:14px;
-  font-weight:700;
-}
-
-/* ===== USER TOPICS (NO SCROLL) ===== */
-.topics-static{
-  display:flex;
-  gap:10px;
-}
-
-.topic{
-  padding:8px 14px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  font-size:13px;
-}
-
-.topic.more{
-  font-weight:700;
-  cursor:pointer;
-}
-
-/* ===== CONTINUE ===== */
-.continue{
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:14px;
-  margin-top:16px;
-}
-
-.continue-item{
-  display:flex;
-  gap:12px;
-  margin-bottom:12px;
-  cursor:pointer;
-  align-items: flex-start; /* Align top để text dài không ảnh hưởng thumbnail */
-}
-
-.thumb{
-  width:96px;
-  height:54px;
-  border-radius:8px;
-  overflow:hidden;
-  position:relative;
-  flex-shrink: 0; /* Ngăn thumbnail bị co lại */
-}
-
-.thumb img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.continue-info {
-  flex: 1; /* Chiếm hết không gian còn lại */
-  min-width: 0; /* Cho phép co lại nếu cần */
-}
-
-.continue-title{
-  font-size:14px;
-  font-weight:600;
-  overflow: hidden; /* Ẩn text tràn */
-  text-overflow: ellipsis; /* Thêm dấu ... nếu dài */
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* Giới hạn 2 dòng */
-  -webkit-box-orient: vertical;
-  line-height: 1.2; /* Điều chỉnh line height */
-}
-
-.continue-meta{
-  font-size:12px;
-  color:var(--muted);
-  white-space: nowrap; /* Không wrap meta */
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ===== MODAL ===== */
-.modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:100;
-}
-
-.modal-overlay.show{
-  display:flex;
-}
-
-.modal{
-  width:90%;
-  max-width:360px;
-  background:var(--card);
-  border-radius:16px;
-  padding:14px;
-}
-
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
-}
-
-.close{
-  cursor:pointer;
-  opacity:.7;
-}
-
-.search{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  background:#1f3326;
-  color:#fff;
-  margin-bottom:10px;
-}
-
-.sort{
-  display:flex;
-  gap:8px;
-}
-
-.sort button{
-  flex:1;
-  padding:8px 0;
-  border-radius:10px;
-  border:none;
-  background:rgba(255,255,255,.06);
-  color:#fff;
-  font-size:13px;
-}
-
-.sort button.active{
-  background:var(--accent);
-  color:#123;
-  font-weight:600;
-}
-
-.tag-list{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  padding-top:6px;
-  border-top:1px solid rgba(255,255,255,.08);
-}
-
-.tag{
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  font-size:13px;
-  cursor:pointer;
-}
-
-.sort-wrapper{
-  margin-bottom:12px;
-}
-
-.sort-label{
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-
-/* ===== PREMIUM ===== */
-.premium{
-  margin-top:14px;
-  border-top:1px solid rgba(255,255,255,.2);
-  padding-top:10px;
-  font-size:13px;
-}
-</style>
-
 <div class="section-title">Topic: ASMR</div>
-
 <section class="topics-static">
   <div class="topic" onclick="location.href='/topic/knowledge'">Knowledge</div>
   <div class="topic" onclick="location.href='/topic/podcast'">Podcast</div>
   <div class="topic" onclick="location.href='/topic/asmr'">ASMR</div>
 </section>
-
 <section class="continue">
   <% if (videos && videos.length > 0) { %>
     <% videos.forEach(video => { %>
-      <% 
+      <%
         // Extract VIDEO_ID từ URL
         let videoId = '';
         if (video.url.includes('youtube.com/watch?v=')) {
@@ -388,7 +348,6 @@ header{
   <% } else { %>
     <p>No videos available for this topic.</p>
   <% } %>
-
   <div class="premium">
     <b>Premium features</b>
     <ul>
@@ -398,6 +357,6 @@ header{
     </ul>
   </div>
 </section>
-
 </div>
 </body>
+</html>
