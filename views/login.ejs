@@ -1,98 +1,113 @@
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Login</title>
-<style>
-:root{
---bg:#0f1712;
---card:#243528;
---accent:#88c273;
---muted:#b9c7b8;
---radius:14px;
-font-family: Inter, system-ui, Arial;
-}
-*{box-sizing:border-box}
-body{
-margin:0;
-min-height:100vh;
-background:linear-gradient(180deg,#0f1712,#16231a);
-display:flex;
-align-items:center;
-justify-content:center;
-color:#f7f5ef;
-}
-.auth-box{
-width:100%;
-max-width:360px;
-background:var(--card);
-padding:24px;
-border-radius:var(--radius);
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
-}
-.logo{
-width:52px;height:52px;
-border-radius:14px;
-background:linear-gradient(135deg,#88c273,#a6d39b);
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:26px;
-margin:0 auto 14px;
-}
-h2{
-text-align:center;
-margin:0 0 20px;
-}
-input{
-width:100%;
-padding:12px;
-border-radius:10px;
-border:none;
-margin-bottom:12px;
-background:rgba(255,255,255,0.08);
-color:#fff;
-}
-button{
-width:100%;
-padding:12px;
-border:none;
-border-radius:10px;
-background:var(--accent);
-color:#1b2b21;
-font-weight:700;
-cursor:pointer;
-}
-.links{
-text-align:center;
-margin-top:14px;
-font-size:13px;
-color:var(--muted);
-}
-.links a{
-color:var(--accent);
-text-decoration:none;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login</title>
+  <style>
+    :root{
+      --bg:#0f1712;
+      --card:#243528;
+      --accent:#88c273;
+      --muted:#b9c7b8;
+      --radius:14px;
+      font-family: Inter, system-ui, Arial;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:linear-gradient(180deg,#0f1712,#16231a);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#f7f5ef;
+    }
+
+    .auth-box{
+      width:100%;
+      max-width:360px;
+      background:var(--card);
+      padding:24px;
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .logo{
+      width:52px;height:52px;
+      border-radius:14px;
+      background:linear-gradient(135deg,#88c273,#a6d39b);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:26px;
+      margin:0 auto 14px;
+    }
+
+    h2{
+      text-align:center;
+      margin:0 0 20px;
+    }
+
+    input{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:none;
+      margin-bottom:12px;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:var(--accent);
+      color:#1b2b21;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .links{
+      text-align:center;
+      margin-top:14px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .links a{
+      color:var(--accent);
+      text-decoration:none;
+    }
+  </style>
 </head>
 <body>
 
-  
+<div class="auth-box">
+  <div class="logo" onclick="location.href='/'" style="cursor:pointer;">
   🦉
+</div>
+  <h2>Đăng nhập</h2>
 
-  Login
-<% if (error === 'invalid_credentials') { %>
-    Incorrect username or password!
+  <% if (error === 'invalid_credentials') { %>
+    <p style="color: red;">Tài khoản hoặc mật khẩu không đúng!</p>
   <% } %>
+
   <form method="POST" action="/auth/login">
     <input type="text" name="username" placeholder="Email hoặc Tên hiển thị" required>
     <input type="password" name="password" placeholder="Mật khẩu" required>
     <button>Đăng nhập</button>
   </form>
-  
-    Don't have an account yet?
-    Register
-  
+
+  <div class="links">
+    Chưa có tài khoản?
+    <a href="/register">Đăng ký</a>
+  </div>
+</div>
 
 </body>
 </html>
