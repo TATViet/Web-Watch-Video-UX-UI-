@@ -355,25 +355,38 @@ header{
   </div>
 </header>
 
-<section class="featured">
-  <div class="video-title">Nguồn gốc của PHỞ bắt đầu từ đâu?</div>
-  <div class="video-meta">SAMURICE • 20:40</div>
+<% if (videos && videos.length > 0) { %>
+  <% const featured = videos[0]; %>
+  <% 
+    // Extract VIDEO_ID từ URL for featured
+    let featuredId = '';
+    if (featured.url.includes('youtube.com/watch?v=')) {
+      featuredId = featured.url.split('v=')[1].split('&')[0];
+    } else if (featured.url.includes('youtu.be/')) {
+      featuredId = featured.url.split('youtu.be/')[1].split('?')[0];
+    }
+    const featuredThumb = featuredId ? `https://img.youtube.com/vi/${featuredId}/hqdefault.jpg` : 'https://via.placeholder.com/96x54?text=No+Thumb';
+  %>
+  <section class="featured">
+    <div class="video-title"><%= featured.title %></div>
+    <div class="video-meta"><%= featured.channel || 'Unknown' %> • <%= featured.duration %></div>
 
-  <div class="video-thumb" onclick="location.href='watch.html'">
-    <img src="https://img.youtube.com/vi/SJF2ph3JWsE/hqdefault.jpg">
-    <div class="play-btn">
-      <div>
-        <svg viewBox="0 0 24 24">
-          <polygon points="8,5 19,12 8,19"/>
-        </svg>
+    <div class="video-thumb" onclick="location.href='/watch/<%= featured.id %>?from=home'">
+      <img src="<%= featuredThumb %>">
+      <div class="play-btn">
+        <div>
+          <svg viewBox="0 0 24 24">
+            <polygon points="8,5 19,12 8,19"/>
+          </svg>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="video-info">
-    Knowledge • 20:40
-  </div>
-</section>
+    <div class="video-info">
+      <%= featured.topics && featured.topics.length > 0 ? featured.topics.join(' • ') : 'Unknown' %> • <%= featured.duration %>
+    </div>
+  </section>
+<% } %>
 
 <div class="section-title">Topics You Watch</div>
 <section class="topics-static">
@@ -386,8 +399,8 @@ header{
 <section class="continue">
   <div class="section-title">Continue video</div>
 
-  <% if (videos && videos.length > 0) { %>
-    <% videos.forEach(video => { %>
+  <% if (videos && videos.length > 1) { %>
+    <% videos.slice(1).forEach(video => { %>
       <% 
         // Extract VIDEO_ID từ URL
         let videoId = '';
@@ -398,7 +411,7 @@ header{
         }
         const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : 'https://via.placeholder.com/96x54?text=No+Thumb'; // Placeholder nếu không có
       %>
-      <div class="continue-item" onclick="location.href='/watch?v=<%= encodeURIComponent(video.url) %>'">
+      <div class="continue-item" onclick="location.href='/watch/<%= video.id %>?from=home'">
         <div class="thumb">
           <img src="<%= thumbnailUrl %>" alt="<%= video.title %>">
         </div>

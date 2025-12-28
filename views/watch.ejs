@@ -342,58 +342,92 @@ body.focus-mode #focusToggle {
   </div>
 </header>
 
-<section class="playing">
-  <div class="playing-top">
-    <div>
-      <div style="font-size:13px;color:#ccc">Playing</div>
-      <h3>Nguồn gốc của PHỞ bắt đầu từ đâu?</h3>
-      <div class="channel">Channel: SAMURICE
-</div>
-    </div>
-    <div class="auto" onclick="toggleAuto(this)">Auto Switch<br><b>OFF</b></div>
-  </div>
-
-  <div class="video-wrap">
-    <div class="ad">AD</div>
-
-    <div class="video-wrapper">
-      <div class="video">
-        <iframe
-          id="playerIframe"
-          src="https://www.youtube-nocookie.com/embed/SJF2ph3JWsE?enablejsapi=1"
-          allowfullscreen>
-        </iframe>
+<% if (video) { %>
+  <% 
+    // Extract VIDEO_ID từ URL for playing video
+    let playingId = '';
+    if (video.url.includes('youtube.com/watch?v=')) {
+      playingId = video.url.split('v=')[1].split('&')[0];
+    } else if (video.url.includes('youtu.be/')) {
+      playingId = video.url.split('youtu.be/')[1].split('?')[0];
+    }
+  %>
+  <section class="playing">
+    <div class="playing-top">
+      <div>
+        <div style="font-size:13px;color:#ccc">Playing</div>
+        <h3><%= video.title %></h3>
+        <div class="channel">Channel: <%= video.channel || 'Unknown' %></div>
       </div>
+      <div class="auto" onclick="toggleAuto(this)">Auto Switch<br><b>OFF</b></div>
     </div>
 
-    <div class="ad">AD</div>
-  </div>
+    <div class="video-wrap">
+      <div class="ad">AD</div>
 
-  <div class="controls">
-    <div class="control-group">
-        <a href="/watch" class="icon-btn">
-        <svg class="icon" viewBox="0 0 24 24">
-          <polygon points="15,5 5,12 15,19"/>
-        </svg>
-      </a>
+      <div class="video-wrapper">
+        <div class="video">
+          <iframe
+            id="playerIframe"
+            src="https://www.youtube-nocookie.com/embed/<%= playingId %>?enablejsapi=1"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
 
-      <a href="/watch2" class="icon-btn">
-        <svg class="icon" viewBox="0 0 24 24">
-          <polygon points="9,5 19,12 9,19"/>
-        </svg>
-      </a>
-
-      <!-- 🛡️ FOCUS BUTTON -->
-      <div class="icon-btn" id="focusToggle" title="Focus mode">🛡️</div>
+      <div class="ad">AD</div>
     </div>
 
-    <div style="font-size:13px">Topic: Knowledge</div>
-  </div>
+    <div class="controls">
+      <div class="control-group">
+        <% if (prevId) { %>
+          <a href="/watch/<%= prevId %>" class="icon-btn">
+            <svg class="icon" viewBox="0 0 24 24">
+              <polygon points="15,5 5,12 15,19"/>
+            </svg>
+          </a>
+        <% } else { %>
+          <div class="icon-btn" style="opacity:0.5; pointer-events:none;">
+            <svg class="icon" viewBox="0 0 24 24">
+              <polygon points="15,5 5,12 15,19"/>
+            </svg>
+          </div>
+        <% } %>
 
-  <div class="tags">
-    Tag: <b class="tag" onclick="location.href='/topic/knowledge'">Knowledge</b>
-  </div>
-</section>
+        <% if (nextId) { %>
+          <a href="/watch/<%= nextId %>" class="icon-btn">
+            <svg class="icon" viewBox="0 0 24 24">
+              <polygon points="9,5 19,12 9,19"/>
+            </svg>
+          </a>
+        <% } else { %>
+          <div class="icon-btn" style="opacity:0.5; pointer-events:none;">
+            <svg class="icon" viewBox="0 0 24 24">
+              <polygon points="9,5 19,12 9,19"/>
+            </svg>
+          </div>
+        <% } %>
+
+        <!-- 🛡️ FOCUS BUTTON -->
+        <div class="icon-btn" id="focusToggle" title="Focus mode">🛡️</div>
+      </div>
+
+      <div style="font-size:13px">Topic: <%= video.topics && video.topics.length > 0 ? video.topics[0] : 'Unknown' %></div>
+    </div>
+
+    <div class="tags">
+      Tag: <% if (video.topics && video.topics.length > 0) { %>
+        <% video.topics.forEach(topic => { %>
+          <b class="tag" onclick="location.href='/topic/<%= topic.toLowerCase() %>'"><%= topic %></b>
+        <% }); %>
+      <% } else { %>
+        <b class="tag">Unknown</b>
+      <% } %>
+    </div>
+  </section>
+<% } else { %>
+  <p>Video not found.</p>
+<% } %>
 
 <section class="list">
   <h4>List of video</h4>
@@ -410,7 +444,7 @@ body.focus-mode #focusToggle {
         }
         const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : 'https://via.placeholder.com/80x50?text=No+Thumb'; // Placeholder nếu không có
       %>
-      <div class="item" onclick="location.href='/watch?v=<%= encodeURIComponent(video.url) %>'">
+      <div class="item" onclick="location.href='/watch/<%= video.id %>'">
         <div class="thumb">
           <img src="<%= thumbnailUrl %>" alt="<%= video.title %>">
         </div>
@@ -455,6 +489,8 @@ body.focus-mode #focusToggle {
 </div>
 
 <script>
+const nextId = <%= nextId ? nextId : 'null' %>;
+
 // Load YouTube API
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -472,8 +508,8 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.ENDED) {
-    if (localStorage.getItem('autoSwitch') === 'ON') {
-      location.href = '/watch2';
+    if (localStorage.getItem('autoSwitch') === 'ON' && nextId) {
+      location.href = '/watch/' + nextId;
     }
   }
 }

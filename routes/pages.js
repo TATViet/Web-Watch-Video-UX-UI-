@@ -13,8 +13,7 @@ const path = require('path'); // Thêm import path
    MAIN PAGES
 ====================== */
 router.get("/", pageController.home);
-router.get("/watch", pageController.watch);
-router.get("/watch2", pageController.watch2);
+router.get("/watch/:videoId", pageController.watch);
 
 router.get("/login", (req, res) => {
   if (req.session.user) return res.redirect("/");
