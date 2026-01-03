@@ -8,8 +8,8 @@ exports.register = async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
 
     await appPool.query(
-      "INSERT INTO users(display_name, email, password_hash) VALUES($1,$2,$3)",
-      [display_name, email, hash]
+      "INSERT INTO users(display_name, email, password_hash, created_at) VALUES($1,$2,$3,$4)",
+      [display_name, email, hash, new Date().toISOString()]
     );
 
     res.redirect("/login");
@@ -53,7 +53,9 @@ exports.login = async (req, res) => {
   req.session.user = {
       id: user.id,
       name: user.display_name,
-      email: user.email  // Thêm email
+      email: user.email,  // Thêm email
+      tutorial_completed: user.tutorial_completed || false,
+      created_at: user.created_at
     };
     res.redirect("/");
   } catch (err) {

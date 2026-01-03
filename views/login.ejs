@@ -83,11 +83,24 @@
       color:var(--accent);
       text-decoration:none;
     }
+
+    .close {
+      color:#aaa;
+      float:right;
+      font-size:28px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .close:hover {
+      color:#fff;
+    }
   </style>
 </head>
 <body>
 
 <div class="auth-box">
+  <span class="close" onclick="history.back()">&times;</span>
   <div class="logo" onclick="location.href='/'" style="cursor:pointer;">
   🦉
 </div>
@@ -111,4 +124,3 @@
 
 </body>
 </html>
-

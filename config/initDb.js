@@ -21,10 +21,21 @@ async function initDatabase() {
         display_name VARCHAR(100),
         email VARCHAR(150) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        tutorial_completed BOOLEAN DEFAULT FALSE
       );
     `);
     console.log("✅ Table users sẵn sàng");
+
+    // Thêm cột nếu chưa có (cho db đã tồn tại)
+    await appPool.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS tutorial_completed BOOLEAN DEFAULT FALSE;
+    `);
+
+    // Set TRUE cho user cũ (nếu cột mới, set TRUE cho existing để không hiện tutorial)
+    await appPool.query(`
+      UPDATE users SET tutorial_completed = TRUE WHERE tutorial_completed IS NULL;
+    `);
 
     // 3. Tạo bảng videos nếu chưa có (với topics là array)
     await appPool.query(`
@@ -39,6 +50,18 @@ async function initDatabase() {
       );
     `);
     console.log("✅ Table videos sẵn sàng");
+
+    // 4. Tạo bảng comments nếu chưa có
+    await appPool.query(`
+      CREATE TABLE IF NOT EXISTS comments (
+        id SERIAL PRIMARY KEY,
+        video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("✅ Table comments sẵn sàng");
 
   } catch (err) {
     console.error("❌ Init DB error:", err);

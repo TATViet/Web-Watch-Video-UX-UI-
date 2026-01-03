@@ -298,6 +298,101 @@ body.focus-mode #focusToggle {
   color: #2ecc71;
 }
 
+/* ===== TUTORIAL NOTIFICATION ===== */
+.tutorial-notif {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--card);
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 50;
+  max-width: 200px;
+  font-size: 13px;
+}
+
+.tutorial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.tutorial-close {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+/* ===== COMMENT MODAL ===== */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+}
+
+.modal-overlay.show{
+  display:flex;
+}
+
+.modal{
+  width:90%;
+  max-width:360px;
+  background:var(--card);
+  border-radius:16px;
+  padding:14px;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.close{
+  cursor:pointer;
+  opacity:.7;
+}
+
+#commentList {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+#commentList div {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  font-size: 13px;
+}
+
+#commentInput {
+  width: 100%;
+  height: 60px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #1f3326;
+  color: #fff;
+  margin-bottom: 10px;
+  resize: none;
+}
+
+#submitComment {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #123;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 </style>
 </head>
 <body>
@@ -410,6 +505,9 @@ body.focus-mode #focusToggle {
 
         <!-- 🛡️ FOCUS BUTTON -->
         <div class="icon-btn" id="focusToggle" title="Focus mode">🛡️</div>
+
+        <!-- 💬 COMMENT BUTTON -->
+        <div class="icon-btn" id="commentToggle" title="Comments">💬</div>
       </div>
 
       <div style="font-size:13px">Topic: <%= video.topics && video.topics.length > 0 ? video.topics[0] : 'Unknown' %></div>
@@ -488,8 +586,22 @@ body.focus-mode #focusToggle {
   ✕
 </div>
 
+<!-- COMMENT MODAL -->
+<div class="modal-overlay" id="commentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <strong>Comments</strong>
+      <span class="close" id="commentClose">✕</span>
+    </div>
+    <div id="commentList"></div>
+    <textarea id="commentInput" placeholder="Write a comment..."></textarea>
+    <button id="submitComment">Submit</button>
+  </div>
+</div>
+
 <script>
 const nextId = <%= nextId ? nextId : 'null' %>;
+const videoId = <%= video ? video.id : 'null' %>;
 
 // Load YouTube API
 var tag = document.createElement('script');
@@ -523,6 +635,10 @@ function onPlayerStateChange(event) {
 
     // 🔒 CHẶN CLICK VIDEO (QUAN TRỌNG)
     iframe.style.pointerEvents = "none";
+
+    if (localStorage.getItem('tutorialStep') === '1') {
+      completeTutorial();
+    }
   });
 
   focusClose.addEventListener("click", () => {
@@ -549,7 +665,135 @@ function onPlayerStateChange(event) {
     if (savedState === 'ON') {
       autoEl.classList.add('on');
     }
+
+    <% if (user && !user.tutorial_completed && user.created_at) { %>
+    if (localStorage.getItem('tutorialStep') === '1') {
+      showTutorial2();
+    }
+    <% } %>
   });
+
+<% if (user && !user.tutorial_completed && user.created_at) { %>
+function showTutorial2() {
+  const notif = document.createElement('div');
+  notif.classList.add('tutorial-notif');
+  notif.id = 'tutorialNotif2';
+  notif.innerHTML = `
+    <div class="tutorial-header">
+      <strong>Protect Mode</strong>
+      <span class="tutorial-close" onclick="cancelTutorial()">✕</span>
+    </div>
+    <p>Now click the 🛡️ button to enable protect mode. It helps you focus by blurring the background and preventing distractions.</p>
+  `;
+  document.body.appendChild(notif);
+}
+
+function cancelTutorial() {
+  if (confirm("Are you sure you want to cancel the tutorial?")) {
+    fetch('/complete-tutorial', { method: 'POST' })
+      .then(() => {
+        const notif = document.getElementById('tutorialNotif2');
+        if (notif) notif.remove();
+        localStorage.removeItem('tutorialStep');
+      })
+      .catch(err => console.error(err));
+  }
+}
+
+function completeTutorial() {
+  fetch('/complete-tutorial', { method: 'POST' })
+    .then(() => {
+      const completeNotif = document.createElement('div');
+      completeNotif.classList.add('tutorial-notif');
+      completeNotif.innerHTML = `
+        <div class="tutorial-header">
+          <strong>Tutorial Complete!</strong>
+          <span class="tutorial-close" onclick="this.parentNode.parentNode.remove()">✕</span>
+        </div>
+        <p>Great! You now know how to use protect mode.</p>
+      `;
+      document.body.appendChild(completeNotif);
+      const notif = document.getElementById('tutorialNotif2');
+      if (notif) notif.remove();
+      localStorage.removeItem('tutorialStep');
+    })
+    .catch(err => console.error(err));
+}
+<% } %>
+
+// Comment functionality
+const commentToggle = document.getElementById('commentToggle');
+const commentModal = document.getElementById('commentModal');
+const commentClose = document.getElementById('commentClose');
+const commentInput = document.getElementById('commentInput');
+const submitComment = document.getElementById('submitComment');
+const commentList = document.getElementById('commentList');
+
+let hasUnsaved = false;
+
+commentInput.addEventListener('input', () => {
+  hasUnsaved = commentInput.value.trim() !== '';
+});
+
+async function loadComments() {
+  try {
+    const res = await fetch(`/comments/${videoId}`);
+    if (res.ok) {
+      const comments = await res.json();
+      commentList.innerHTML = comments.map(c => `
+        <div>
+          <b>${c.display_name}</b>: ${c.content}
+          <span style="font-size:11px; color:var(--muted);">${new Date(c.created_at).toLocaleString()}</span>
+        </div>
+      `).join('');
+    } else {
+      commentList.innerHTML = '<p>Error loading comments.</p>';
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+commentToggle.addEventListener('click', () => {
+  commentModal.classList.add('show');
+  loadComments();
+});
+
+commentClose.addEventListener('click', () => {
+  if (hasUnsaved && !confirm('Are you sure? Exiting will delete your unsaved comment?')) {
+    return;
+  }
+  commentModal.classList.remove('show');
+  commentInput.value = '';
+  hasUnsaved = false;
+});
+
+submitComment.addEventListener('click', async () => {
+  const content = commentInput.value.trim();
+  if (!content) return;
+
+  try {
+    const res = await fetch(`/comments/${videoId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content })
+    });
+
+    if (res.ok) {
+      commentInput.value = '';
+      hasUnsaved = false;
+      loadComments();
+    } else if (res.status === 401) {
+      alert('Please login to comment');
+      location.href = '/login';
+    } else {
+      alert('Error posting comment');
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 </script>
 
 </body>
