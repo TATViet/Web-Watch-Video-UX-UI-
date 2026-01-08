@@ -393,6 +393,15 @@ body.focus-mode #focusToggle {
   cursor: pointer;
 }
 
+/* Gesture overlay (new) */
+#gestureOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50; /* Trên overlay focus nhưng dưới nút close */
+  background: transparent;
+  pointer-events: none; /* Bình thường không chặn */
+}
+
 </style>
 </head>
 <body>
@@ -585,6 +594,9 @@ body.focus-mode #focusToggle {
 >
   ✕
 </div>
+
+<!-- GESTURE OVERLAY (NEW) -->
+<div id="gestureOverlay"></div>
 
 <!-- COMMENT MODAL -->
 <div class="modal-overlay" id="commentModal">
@@ -797,50 +809,58 @@ submitComment.addEventListener('click', async () => {
 // Gesture detection for protect mode (hidden feature)
 let isDrawing = false;
 let gesturePoints = [];
+const gestureOverlay = document.getElementById('gestureOverlay');
 
-document.addEventListener('touchstart', startGesture, { passive: false });
-document.addEventListener('touchmove', drawGesture, { passive: false });
-document.addEventListener('touchend', endGesture, { passive: false });
+// Attach events to overlay instead of document for better isolation
+gestureOverlay.addEventListener('touchstart', startGesture, { passive: false });
+gestureOverlay.addEventListener('touchmove', drawGesture, { passive: false });
+gestureOverlay.addEventListener('touchend', endGesture, { passive: false });
 
-// For desktop testing (optional)
-document.addEventListener('mousedown', startGestureMouse);
-document.addEventListener('mousemove', drawGestureMouse);
-document.addEventListener('mouseup', endGesture);
+// For desktop testing
+gestureOverlay.addEventListener('mousedown', startGestureMouse);
+gestureOverlay.addEventListener('mousemove', drawGestureMouse);
+gestureOverlay.addEventListener('mouseup', endGesture);
 
 function startGesture(e) {
   if (e.touches.length !== 1) return;
-  e.preventDefault(); // Prevent scrolling while drawing
+  e.preventDefault(); // Prevent scroll
+  gestureOverlay.style.pointerEvents = 'auto'; // Activate overlay to capture
   isDrawing = true;
   gesturePoints = [];
   const x = e.touches[0].clientX;
   const y = e.touches[0].clientY;
   gesturePoints.push({ x, y });
+  console.log('Gesture start (mobile)');
 }
 
 function drawGesture(e) {
   if (!isDrawing || e.touches.length !== 1) return;
-  e.preventDefault();
+  e.preventDefault(); // Prevent scroll during draw
   const x = e.touches[0].clientX;
   const y = e.touches[0].clientY;
   gesturePoints.push({ x, y });
 }
 
-function endGesture(e) {
+function endGesture() {
   if (!isDrawing) return;
   isDrawing = false;
+  gestureOverlay.style.pointerEvents = 'none'; // Deactivate overlay
   detectGesture();
   gesturePoints = [];
+  console.log('Gesture end (mobile)');
 }
 
 // Mouse versions for testing
 function startGestureMouse(e) {
   if (e.button !== 0) return;
   e.preventDefault(); // Prevent text selection
+  gestureOverlay.style.pointerEvents = 'auto';
   isDrawing = true;
   gesturePoints = [];
   const x = e.clientX;
   const y = e.clientY;
   gesturePoints.push({ x, y });
+  console.log('Gesture start (desktop)');
 }
 
 function drawGestureMouse(e) {
@@ -851,15 +871,20 @@ function drawGestureMouse(e) {
   gesturePoints.push({ x, y });
 }
 
-function endGesture(e) {
+function endGesture() {
   if (!isDrawing) return;
   isDrawing = false;
+  gestureOverlay.style.pointerEvents = 'none';
   detectGesture();
   gesturePoints = [];
+  console.log('Gesture end (desktop)');
 }
 
 function detectGesture() {
-  if (gesturePoints.length < 20) return; // Too short
+  if (gesturePoints.length < 20) {
+    console.log('Gesture too short');
+    return;
+  }
 
   // Find bounds
   let minX = Math.min(...gesturePoints.map(p => p.x));
@@ -867,7 +892,10 @@ function detectGesture() {
   let minY = Math.min(...gesturePoints.map(p => p.y));
   let maxY = Math.max(...gesturePoints.map(p => p.y));
 
-  if (maxX - minX < 100 || maxY - minY < 100) return; // Too small
+  if (maxX - minX < 100 || maxY - minY < 100) {
+    console.log('Gesture too small');
+    return;
+  }
 
   // Find bottom point (max Y)
   let bottomIndex = 0;
@@ -879,7 +907,10 @@ function detectGesture() {
     }
   }
 
-  if (bottomIndex < 5 || bottomIndex > gesturePoints.length - 6) return; // Not in middle-ish
+  if (bottomIndex < 5 || bottomIndex > gesturePoints.length - 6) {
+    console.log('Bottom not in middle');
+    return;
+  }
 
   // Calculate overall direction
   let overallDX = gesturePoints[gesturePoints.length - 1].x - gesturePoints[0].x;
@@ -895,23 +926,27 @@ function detectGesture() {
   let isV = false;
 
   if (overallDX > 50) { // Left to right V (enable)
-    // Normal V: left leg down-right (DX >0, DY >0), right leg up-right (DX >0, DY <0)
     if (leftDX > 30 && leftDY > 50 && rightDX > 30 && rightDY < -50) {
       isV = true;
+      console.log('Detected V left-to-right - Enabling protect mode');
       if (!document.body.classList.contains('focus-mode')) {
         document.body.classList.add('focus-mode');
         iframe.style.pointerEvents = "none";
       }
     }
   } else if (overallDX < -50) { // Right to left V (disable)
-    // Reverse V: left leg down-left (DX <0, DY >0), right leg up-left (DX <0, DY <0)
     if (leftDX < -30 && leftDY > 50 && rightDX < -30 && rightDY < -50) {
       isV = true;
+      console.log('Detected V right-to-left - Disabling protect mode');
       if (document.body.classList.contains('focus-mode')) {
         document.body.classList.remove('focus-mode');
         iframe.style.pointerEvents = "auto";
       }
     }
+  }
+
+  if (!isV) {
+    console.log('No V detected');
   }
 }
 
