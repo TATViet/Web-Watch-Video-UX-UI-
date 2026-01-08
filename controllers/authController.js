@@ -55,6 +55,8 @@ exports.login = async (req, res) => {
       name: user.display_name,
       email: user.email,  // Thêm email
       tutorial_completed: user.tutorial_completed || false,
+      premium: user.premium || 0,
+      fast_access: user.fast_access || false,
       created_at: user.created_at
     };
     res.redirect("/");
@@ -81,7 +83,7 @@ exports.confirmEdit = async (req, res) => {
 
   if (req.method === 'GET') {
     // Giữ cho compatibility nếu cần, nhưng không dùng
-    return res.render("account", { mode: 'confirm', error: null, user: req.session.user });
+    return res.render("account", { mode: 'confirm', error: null, user: req.session.user, success: false });
   }
 
   try {
@@ -107,12 +109,13 @@ exports.editProfile = async (req, res) => {
   if (!req.session.user || !req.session.allowEdit) return res.json({ success: false });
 
   if (req.method === 'GET') {
-    // Giữ cho compatibility
-    return res.render("account", { mode: 'edit', user: req.session.user, success: false });
+    // Sửa để render đúng template
+    const success = req.query.success === 'true';
+    return res.render("edit-profile", { user: req.session.user, success });
   }
 
   try {
-    const { display_name, email, new_password } = req.body;
+    const { display_name, email, new_password, fast_access } = req.body;
     let query = "UPDATE users SET ";
     let params = [];
     let index = 1;
@@ -133,8 +136,14 @@ exports.editProfile = async (req, res) => {
       params.push(hash);
     }
 
-    if (params.length === 0) {
-      return res.json({ success: false });
+    // Xử lý Fast Access (luôn update để có thể set off)
+    const fastAccessValue = fast_access === 'on';
+    query += `fast_access = $${index++}, `;
+    params.push(fastAccessValue);
+    req.session.user.fast_access = fastAccessValue;
+
+    if (params.length === 1) { // Chỉ fast_access, nhưng vẫn cho phép
+      // OK
     }
 
     query = query.slice(0, -2) + ` WHERE id = $${index}`;
@@ -144,7 +153,7 @@ exports.editProfile = async (req, res) => {
 
     delete req.session.allowEdit;  // Xóa flag sau edit
 
-    res.json({ success: true });
+    res.redirect('/account/edit?success=true');
   } catch (err) {
     console.error('Edit profile error:', err);
     if (err.code === '23505') {  // Duplicate unique

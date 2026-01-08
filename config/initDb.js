@@ -37,6 +37,14 @@ async function initDatabase() {
       UPDATE users SET tutorial_completed = TRUE WHERE tutorial_completed IS NULL;
     `);
 
+    // Thêm cột mới cho premium và fast_access
+    await appPool.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS premium INTEGER DEFAULT 0;
+    `);
+    await appPool.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS fast_access BOOLEAN DEFAULT FALSE;
+    `);
+
     // 3. Tạo bảng videos nếu chưa có (với topics là array)
     await appPool.query(`
       CREATE TABLE IF NOT EXISTS videos (

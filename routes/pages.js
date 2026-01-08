@@ -72,7 +72,7 @@ router.get("/topic/:name", async (req, res) => {
 ====================== */
 router.get("/account", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
-  res.render("account", { user: req.session.user });
+  res.render("account", { user: req.session.user, success: false });
 });
 
 router.get("/account/confirm-edit", authController.confirmEdit);  // GET cho form confirm
