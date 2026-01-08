@@ -794,6 +794,127 @@ submitComment.addEventListener('click', async () => {
   }
 });
 
+// Gesture detection for protect mode (hidden feature)
+let isDrawing = false;
+let gesturePoints = [];
+
+document.addEventListener('touchstart', startGesture, { passive: false });
+document.addEventListener('touchmove', drawGesture, { passive: false });
+document.addEventListener('touchend', endGesture, { passive: false });
+
+// For desktop testing (optional)
+document.addEventListener('mousedown', startGestureMouse);
+document.addEventListener('mousemove', drawGestureMouse);
+document.addEventListener('mouseup', endGesture);
+
+function startGesture(e) {
+  if (e.touches.length !== 1) return;
+  e.preventDefault(); // Prevent scrolling while drawing
+  isDrawing = true;
+  gesturePoints = [];
+  const x = e.touches[0].clientX;
+  const y = e.touches[0].clientY;
+  gesturePoints.push({ x, y });
+}
+
+function drawGesture(e) {
+  if (!isDrawing || e.touches.length !== 1) return;
+  e.preventDefault();
+  const x = e.touches[0].clientX;
+  const y = e.touches[0].clientY;
+  gesturePoints.push({ x, y });
+}
+
+function endGesture(e) {
+  if (!isDrawing) return;
+  isDrawing = false;
+  detectGesture();
+  gesturePoints = [];
+}
+
+// Mouse versions for testing
+function startGestureMouse(e) {
+  if (e.button !== 0) return;
+  e.preventDefault(); // Prevent text selection
+  isDrawing = true;
+  gesturePoints = [];
+  const x = e.clientX;
+  const y = e.clientY;
+  gesturePoints.push({ x, y });
+}
+
+function drawGestureMouse(e) {
+  if (!isDrawing) return;
+  e.preventDefault(); // Prevent text selection during drag
+  const x = e.clientX;
+  const y = e.clientY;
+  gesturePoints.push({ x, y });
+}
+
+function endGesture(e) {
+  if (!isDrawing) return;
+  isDrawing = false;
+  detectGesture();
+  gesturePoints = [];
+}
+
+function detectGesture() {
+  if (gesturePoints.length < 20) return; // Too short
+
+  // Find bounds
+  let minX = Math.min(...gesturePoints.map(p => p.x));
+  let maxX = Math.max(...gesturePoints.map(p => p.x));
+  let minY = Math.min(...gesturePoints.map(p => p.y));
+  let maxY = Math.max(...gesturePoints.map(p => p.y));
+
+  if (maxX - minX < 100 || maxY - minY < 100) return; // Too small
+
+  // Find bottom point (max Y)
+  let bottomIndex = 0;
+  let bottomY = minY;
+  for (let i = 0; i < gesturePoints.length; i++) {
+    if (gesturePoints[i].y > bottomY) {
+      bottomY = gesturePoints[i].y;
+      bottomIndex = i;
+    }
+  }
+
+  if (bottomIndex < 5 || bottomIndex > gesturePoints.length - 6) return; // Not in middle-ish
+
+  // Calculate overall direction
+  let overallDX = gesturePoints[gesturePoints.length - 1].x - gesturePoints[0].x;
+
+  // Left leg: start to bottom
+  let leftDX = gesturePoints[bottomIndex].x - gesturePoints[0].x;
+  let leftDY = gesturePoints[bottomIndex].y - gesturePoints[0].y;
+
+  // Right leg: bottom to end
+  let rightDX = gesturePoints[gesturePoints.length - 1].x - gesturePoints[bottomIndex].x;
+  let rightDY = gesturePoints[gesturePoints.length - 1].y - gesturePoints[bottomIndex].y;
+
+  let isV = false;
+
+  if (overallDX > 50) { // Left to right V (enable)
+    // Normal V: left leg down-right (DX >0, DY >0), right leg up-right (DX >0, DY <0)
+    if (leftDX > 30 && leftDY > 50 && rightDX > 30 && rightDY < -50) {
+      isV = true;
+      if (!document.body.classList.contains('focus-mode')) {
+        document.body.classList.add('focus-mode');
+        iframe.style.pointerEvents = "none";
+      }
+    }
+  } else if (overallDX < -50) { // Right to left V (disable)
+    // Reverse V: left leg down-left (DX <0, DY >0), right leg up-left (DX <0, DY <0)
+    if (leftDX < -30 && leftDY > 50 && rightDX < -30 && rightDY < -50) {
+      isV = true;
+      if (document.body.classList.contains('focus-mode')) {
+        document.body.classList.remove('focus-mode');
+        iframe.style.pointerEvents = "auto";
+      }
+    }
+  }
+}
+
 </script>
 
 </body>
