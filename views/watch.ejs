@@ -806,149 +806,77 @@ submitComment.addEventListener('click', async () => {
   }
 });
 
-// Gesture detection for protect mode (hidden feature)
-let isDrawing = false;
-let gesturePoints = [];
+// Gesture detection for protect mode (hidden feature) - Pinch zoom for mobile
+let initialDistance = 0;
+let isPinching = false;
 const gestureOverlay = document.getElementById('gestureOverlay');
 
-// Attach events to overlay instead of document for better isolation
-gestureOverlay.addEventListener('touchstart', startGesture, { passive: false });
-gestureOverlay.addEventListener('touchmove', drawGesture, { passive: false });
-gestureOverlay.addEventListener('touchend', endGesture, { passive: false });
+// Attach events to overlay
+gestureOverlay.addEventListener('touchstart', startPinch, { passive: false });
+gestureOverlay.addEventListener('touchmove', handlePinch, { passive: false });
+gestureOverlay.addEventListener('touchend', endPinch, { passive: false });
 
-// For desktop testing
-gestureOverlay.addEventListener('mousedown', startGestureMouse);
-gestureOverlay.addEventListener('mousemove', drawGestureMouse);
-gestureOverlay.addEventListener('mouseup', endGesture);
-
-function startGesture(e) {
-  if (e.touches.length !== 1) return;
-  e.preventDefault(); // Prevent scroll
-  gestureOverlay.style.pointerEvents = 'auto'; // Activate overlay to capture
-  isDrawing = true;
-  gesturePoints = [];
-  const x = e.touches[0].clientX;
-  const y = e.touches[0].clientY;
-  gesturePoints.push({ x, y });
-  console.log('Gesture start (mobile)');
+function getDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
-function drawGesture(e) {
-  if (!isDrawing || e.touches.length !== 1) return;
-  e.preventDefault(); // Prevent scroll during draw
-  const x = e.touches[0].clientX;
-  const y = e.touches[0].clientY;
-  gesturePoints.push({ x, y });
-}
-
-function endGesture() {
-  if (!isDrawing) return;
-  isDrawing = false;
-  gestureOverlay.style.pointerEvents = 'none'; // Deactivate overlay
-  detectGesture();
-  gesturePoints = [];
-  console.log('Gesture end (mobile)');
-}
-
-// Mouse versions for testing
-function startGestureMouse(e) {
-  if (e.button !== 0) return;
-  e.preventDefault(); // Prevent text selection
-  gestureOverlay.style.pointerEvents = 'auto';
-  isDrawing = true;
-  gesturePoints = [];
-  const x = e.clientX;
-  const y = e.clientY;
-  gesturePoints.push({ x, y });
-  console.log('Gesture start (desktop)');
-}
-
-function drawGestureMouse(e) {
-  if (!isDrawing) return;
-  e.preventDefault(); // Prevent text selection during drag
-  const x = e.clientX;
-  const y = e.clientY;
-  gesturePoints.push({ x, y });
-}
-
-function endGesture() {
-  if (!isDrawing) return;
-  isDrawing = false;
-  gestureOverlay.style.pointerEvents = 'none';
-  detectGesture();
-  gesturePoints = [];
-  console.log('Gesture end (desktop)');
-}
-
-function detectGesture() {
-  if (gesturePoints.length < 20) {
-    console.log('Gesture too short');
-    return;
+function startPinch(e) {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    gestureOverlay.style.pointerEvents = 'auto'; // Activate overlay
+    isPinching = true;
+    initialDistance = getDistance(e.touches);
+    console.log('Pinch start');
   }
+}
 
-  // Find bounds
-  let minX = Math.min(...gesturePoints.map(p => p.x));
-  let maxX = Math.max(...gesturePoints.map(p => p.x));
-  let minY = Math.min(...gesturePoints.map(p => p.y));
-  let maxY = Math.max(...gesturePoints.map(p => p.y));
+function handlePinch(e) {
+  if (!isPinching || e.touches.length !== 2) return;
+  e.preventDefault();
+  // We can detect during move, but to keep simple, detect at end
+}
 
-  if (maxX - minX < 100 || maxY - minY < 100) {
-    console.log('Gesture too small');
-    return;
-  }
-
-  // Find bottom point (max Y)
-  let bottomIndex = 0;
-  let bottomY = minY;
-  for (let i = 0; i < gesturePoints.length; i++) {
-    if (gesturePoints[i].y > bottomY) {
-      bottomY = gesturePoints[i].y;
-      bottomIndex = i;
-    }
-  }
-
-  if (bottomIndex < 5 || bottomIndex > gesturePoints.length - 6) {
-    console.log('Bottom not in middle');
-    return;
-  }
-
-  // Calculate overall direction
-  let overallDX = gesturePoints[gesturePoints.length - 1].x - gesturePoints[0].x;
-
-  // Left leg: start to bottom
-  let leftDX = gesturePoints[bottomIndex].x - gesturePoints[0].x;
-  let leftDY = gesturePoints[bottomIndex].y - gesturePoints[0].y;
-
-  // Right leg: bottom to end
-  let rightDX = gesturePoints[gesturePoints.length - 1].x - gesturePoints[bottomIndex].x;
-  let rightDY = gesturePoints[gesturePoints.length - 1].y - gesturePoints[bottomIndex].y;
-
-  let isV = false;
-
-  if (overallDX > 50) { // Left to right V (enable)
-    if (leftDX > 30 && leftDY > 50 && rightDX > 30 && rightDY < -50) {
-      isV = true;
-      console.log('Detected V left-to-right - Enabling protect mode');
-      if (!document.body.classList.contains('focus-mode')) {
-        document.body.classList.add('focus-mode');
-        iframe.style.pointerEvents = "none";
+function endPinch(e) {
+  if (!isPinching) return;
+  if (e.touches.length < 2) {
+    const finalDistance = initialDistance; // Since at end, touches may be 1, but we use initial
+    // Actually, calculate at last move, but for simplicity, we need to track last distance
+    // Better to track currentDistance in move
+    // Assuming we set currentDistance in move
+    if (typeof currentDistance !== 'undefined' && currentDistance !== initialDistance) {
+      if (currentDistance < initialDistance) {
+        // Zoom in (pinch in) - enable protect mode
+        console.log('Detected zoom in - Enabling protect mode');
+        if (!document.body.classList.contains('focus-mode')) {
+          document.body.classList.add('focus-mode');
+          iframe.style.pointerEvents = "none";
+        }
+      } else if (currentDistance > initialDistance) {
+        // Zoom out (pinch out) - disable protect mode
+        console.log('Detected zoom out - Disabling protect mode');
+        if (document.body.classList.contains('focus-mode')) {
+          document.body.classList.remove('focus-mode');
+          iframe.style.pointerEvents = "auto";
+        }
       }
     }
-  } else if (overallDX < -50) { // Right to left V (disable)
-    if (leftDX < -30 && leftDY > 50 && rightDX < -30 && rightDY < -50) {
-      isV = true;
-      console.log('Detected V right-to-left - Disabling protect mode');
-      if (document.body.classList.contains('focus-mode')) {
-        document.body.classList.remove('focus-mode');
-        iframe.style.pointerEvents = "auto";
-      }
-    }
-  }
-
-  if (!isV) {
-    console.log('No V detected');
+    isPinching = false;
+    gestureOverlay.style.pointerEvents = 'none'; // Deactivate
+    initialDistance = 0;
+    currentDistance = 0;
+    console.log('Pinch end');
   }
 }
+
+// Track current distance in touchmove
+let currentDistance = 0;
+gestureOverlay.addEventListener('touchmove', (e) => {
+  if (isPinching && e.touches.length === 2) {
+    currentDistance = getDistance(e.touches);
+  }
+});
 
 </script>
 
