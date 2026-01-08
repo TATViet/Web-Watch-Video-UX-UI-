@@ -393,15 +393,6 @@ body.focus-mode #focusToggle {
   cursor: pointer;
 }
 
-/* Gesture overlay (new) */
-#gestureOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50; /* Trên overlay focus nhưng dưới nút close */
-  background: transparent;
-  pointer-events: none; /* Bình thường không chặn */
-}
-
 </style>
 </head>
 <body>
@@ -594,9 +585,6 @@ body.focus-mode #focusToggle {
 >
   ✕
 </div>
-
-<!-- GESTURE OVERLAY (NEW) -->
-<div id="gestureOverlay"></div>
 
 <!-- COMMENT MODAL -->
 <div class="modal-overlay" id="commentModal">
@@ -803,78 +791,6 @@ submitComment.addEventListener('click', async () => {
     }
   } catch (err) {
     console.error(err);
-  }
-});
-
-// Gesture detection for protect mode (hidden feature) - Pinch zoom for mobile
-let initialDistance = 0;
-let isPinching = false;
-const gestureOverlay = document.getElementById('gestureOverlay');
-
-// Attach events to overlay
-gestureOverlay.addEventListener('touchstart', startPinch, { passive: false });
-gestureOverlay.addEventListener('touchmove', handlePinch, { passive: false });
-gestureOverlay.addEventListener('touchend', endPinch, { passive: false });
-
-function getDistance(touches) {
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function startPinch(e) {
-  if (e.touches.length === 2) {
-    e.preventDefault();
-    gestureOverlay.style.pointerEvents = 'auto'; // Activate overlay
-    isPinching = true;
-    initialDistance = getDistance(e.touches);
-    console.log('Pinch start');
-  }
-}
-
-function handlePinch(e) {
-  if (!isPinching || e.touches.length !== 2) return;
-  e.preventDefault();
-  // We can detect during move, but to keep simple, detect at end
-}
-
-function endPinch(e) {
-  if (!isPinching) return;
-  if (e.touches.length < 2) {
-    const finalDistance = initialDistance; // Since at end, touches may be 1, but we use initial
-    // Actually, calculate at last move, but for simplicity, we need to track last distance
-    // Better to track currentDistance in move
-    // Assuming we set currentDistance in move
-    if (typeof currentDistance !== 'undefined' && currentDistance !== initialDistance) {
-      if (currentDistance < initialDistance) {
-        // Zoom in (pinch in) - enable protect mode
-        console.log('Detected zoom in - Enabling protect mode');
-        if (!document.body.classList.contains('focus-mode')) {
-          document.body.classList.add('focus-mode');
-          iframe.style.pointerEvents = "none";
-        }
-      } else if (currentDistance > initialDistance) {
-        // Zoom out (pinch out) - disable protect mode
-        console.log('Detected zoom out - Disabling protect mode');
-        if (document.body.classList.contains('focus-mode')) {
-          document.body.classList.remove('focus-mode');
-          iframe.style.pointerEvents = "auto";
-        }
-      }
-    }
-    isPinching = false;
-    gestureOverlay.style.pointerEvents = 'none'; // Deactivate
-    initialDistance = 0;
-    currentDistance = 0;
-    console.log('Pinch end');
-  }
-}
-
-// Track current distance in touchmove
-let currentDistance = 0;
-gestureOverlay.addEventListener('touchmove', (e) => {
-  if (isPinching && e.touches.length === 2) {
-    currentDistance = getDistance(e.touches);
   }
 });
 
